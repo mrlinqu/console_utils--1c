@@ -1,0 +1,22 @@
+#!/bin/bash
+
+bin_dir="$(dirname "$0")"
+. ${bin_dir}/.1c.inc
+
+
+IB_NAME=$1
+
+params=--name=${IB_NAME} \
+    --dbms=PostgreSQL --db-server=${PG_HOST} --db-name=${IB_NAME} --db-user=${PG_USER} --db-pwd=${PG_PWD} \
+    --locale=ru \
+    --license-distribution=allow
+
+if ["${2}" == "create" ]; then
+    params=${params} --create-database
+fi
+
+if ["${3}" == "off" ]; then
+    params=${params} --scheduled-jobs-deny=on
+fi
+
+${RAC} infobase create ${params}

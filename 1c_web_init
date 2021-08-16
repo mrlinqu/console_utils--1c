@@ -1,0 +1,25 @@
+#!/bin/bash
+
+bin_dir="$(dirname "$0")"
+. ${bin_dir}/.1c.inc
+
+
+HOST="${1}.1isa.ru"
+USER=$2
+PASSWD=$3
+
+cp ${SITES_AVAILABLE}/.skel ${SITES_AVAILABLE}/${HOST}.conf
+sed -i "s/##HOST##/${HOST}/g" ${SITES_AVAILABLE}/${HOST}.conf
+ln -s ${SITES_AVAILABLE}/${HOST}.conf ${SITES_ENABLED}/
+
+/etc/init.d/apache2 reload
+
+mkdir -p /var/www/${HOST}
+certbot certonly --webroot --webroot-path /var/www/${HOST} -d ${HOST}
+sed -i "s/^#//g" ${SITES_AVAILABLE}/${HOST}.conf
+
+echo ${PASSWD} | htpasswd -ni ${USER} >> /var/www/${HOST}.passwd
+
+mkdir -p /var/log/apache2/${HOST}
+
+/etc/init.d/apache2 reload

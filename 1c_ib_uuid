@@ -1,0 +1,13 @@
+#!/bin/bash
+
+bin_dir="$(dirname "$0")"
+. ${bin_dir}/.1c.inc
+
+
+IB_NAME=$1
+if [ "${1}" == "" ]; then
+    echo -e "Usage:\n${0} <ib name>\n"
+    exit
+fi
+
+grep "\"${IB_NAME}\"" ${LST_FILE} | awk 'BEGIN{FS=","};{print $1}' | sed 's/^{//'

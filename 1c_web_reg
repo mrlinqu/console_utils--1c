@@ -1,0 +1,24 @@
+#!/bin/bash
+
+bin_dir="$(dirname "$0")"
+. ${bin_dir}/.1c.inc
+
+
+HOST="${1}"
+FCDN="${1}.1isa.ru"
+DB=$2
+
+mkdir -p /var/www/${FCDN}/${DB}/
+
+vrd="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n
+<point xmlns=\"http://v8.1c.ru/8.2/virtual-resource-system\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" base=\"/${DB}\" ib=\"Srvr=app2;Ref=${HOST}_${DB}\">\n
+\t<ws enable=\"false\"/>\n
+\t<standardOdata enable=\"false\" reuseSessions=\"autouse\" sessionMaxAge=\"20\" poolSize=\"10\" poolTimeout=\"5\"/>\n
+</point>"
+
+echo -e ${vrd} > /var/www/${FCDN}/${DB}.vrd
+
+str="<Directory \"/var/www/${FCDN}/${DB}/\">\n\t\tManagedApplicationDescriptor \"/var/www/${FCDN}/${DB}.vrd\"\n\t</Directory>\n"
+sed -i "s%##DBS##%${str}\t##DBS##%g" ${SITES_AVAILABLE}/${FCDN}.conf
+
+/etc/init.d/apache2 reload
